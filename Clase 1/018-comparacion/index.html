@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <video playsinline autoplay id="video" width=640 height=480></video>
+        <canvas id="lienzo" width=640 height=480></canvas>
+        <canvas id="lienzo2" width=640 height=480></canvas>
+        <script>
+            var imagenanterior = 0;
+            // Selecciono el video y lo pongo en una variable
+            const video = document.querySelector('video');
+            // Selecciono el canvas y lo meto en una variable
+            const canvas = window.canvas = document.querySelector('canvas');
+            var contexto = document.getElementById("lienzo").getContext("2d")
+            var contexto2 = document.getElementById("lienzo2").getContext("2d")
+            // Esto es lo que ocurre cuando la captura es exitosa
+            function handleSuccess(stream) {
+                // En el video, pongo lo que viene de la camara
+              window.stream = stream; 
+              video.srcObject = stream;
+            }
+            const constraints = {
+              audio: false,
+              video: true
+            };
+           // Del navegador, cojo la cámara, y entonces (then) ejecuto handleSuccess
+            navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess);
+            // Creo un temporizador para ejecutar un bucle
+            var temporizador = setTimeout("bucle()",33)
+            var contador = 0;
+            // Defino la función de bucle
+            function bucle(){
+                // Copio la información desde el video hasta el canvas
+                canvas.getContext('2d').drawImage(video, 0, 0, 640,480);
+                // Voy a hacer algo con la imagen
+                var pixeles = contexto.getImageData(0,0,640,480)
+                var pixeles2 = contexto2.getImageData(0,0,640,480)
+                // Comparación de cuántos han cambiado
+                if(contador > 0){
+                    for(var i = 0;i<pixeles.data.length;i+=4){
+                        valor = Math.abs(pixeles.data[i] - imagenanterior.data[i])
+                        pixeles2.data[i] = valor
+                        pixeles2.data[i+1] = valor
+                        pixeles2.data[i+2] = valor
+                        pixeles2.data[i+3] = 255
+                    }
+                }
+                contexto2.putImageData(pixeles2,0,0)
+                
+                imagenanterior = pixeles
+                contador++;
+                // Borro el temporizador
+                clearTimeout(temporizador)
+                // Relanzo la funcion
+                temporizador = setTimeout("bucle()",33)
+            }
+        </script>
+    </body>
+</html>

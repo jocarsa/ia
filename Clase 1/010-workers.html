@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <canvas id="lienzo" width="400" height="400"></canvas>
+        <script>
+            var nucleos = navigator.hardwareConcurrency;
+            console.log("Tu ordenador tiene "+nucleos+" nucleos")
+            var trabajadores = [];
+            for(var i = 0;i<nucleos;i++){
+                trabajadores[i] = new Worker("010trabajador.js");
+                trabajadores[i].postMessage(2)
+                trabajadores[i].onmessage = function(datos){
+                    console.log("el resultado es :"+datos.data)
+                }
+            }
+            
+        </script>
+    </body>
+</html>

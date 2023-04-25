@@ -6,7 +6,10 @@
         <script>
             var nucleos = navigator.hardwareConcurrency;
             console.log("Tu ordenador tiene "+nucleos+" nucleos")
-            //var trabajador = new Worker();
+            var trabajadores = [];
+            for(var i = 0;i<nucleos;i++){
+                trabajadores[i] = new Worker("008trabajador.js");
+            }
             
         </script>
     </body>

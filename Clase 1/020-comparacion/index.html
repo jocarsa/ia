@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <video playsinline autoplay id="video" width=640 height=480></video>
+        <canvas id="lienzo" width=640 height=480></canvas>
+        <canvas id="lienzo2" width=640 height=480></canvas>
+        <canvas id="lienzo3" width=640 height=480></canvas>
+        <script>
+            var imagenanterior = 0;
+            // Selecciono el video y lo pongo en una variable
+            const video = document.querySelector('video');
+            // Selecciono el canvas y lo meto en una variable
+            const canvas = window.canvas = document.querySelector('canvas');
+            var contexto = document.getElementById("lienzo").getContext("2d")
+            var contexto2 = document.getElementById("lienzo2").getContext("2d")
+            var contexto3 = document.getElementById("lienzo3").getContext("2d")
+            // Esto es lo que ocurre cuando la captura es exitosa
+            function handleSuccess(stream) {
+                // En el video, pongo lo que viene de la camara
+              window.stream = stream; 
+              video.srcObject = stream;
+            }
+            const constraints = {
+              audio: false,
+              video: true
+            };
+           // Del navegador, cojo la cámara, y entonces (then) ejecuto handleSuccess
+            navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess);
+            // Creo un temporizador para ejecutar un bucle
+            var temporizador = setTimeout("bucle()",33)
+            var contador = 0;
+            // Defino la función de bucle
+            function bucle(){
+                contexto3.clearRect(0,0,640,480)
+                // Copio la información desde el video hasta el canvas
+                canvas.getContext('2d').drawImage(video, 0, 0, 640,480);
+                // Voy a hacer algo con la imagen
+                var pixeles = contexto.getImageData(0,0,640,480)
+                var pixeles2 = contexto2.getImageData(0,0,640,480)
+                var pixeles3 = contexto3.getImageData(0,0,640,480)
+                // Comparación de cuántos han cambiado
+                if(contador > 0){
+                    // Primero proceso los pixeles
+                    for(var i = 0;i<pixeles.data.length;i+=4){
+                        // Saco la diferencia de los pixeles
+                        valor = Math.abs(pixeles.data[i] - imagenanterior.data[i])
+                        // Pongo esa diferencia en el canal rojo
+                        pixeles2.data[i] = valor
+                        // Pongo esa diferencia en el canal verde
+                        pixeles2.data[i+1] = valor
+                        // Pongo esa diferencia en el canal azul
+                        pixeles2.data[i+2] = valor
+                        // En alfa siempre pongo 255
+                        pixeles2.data[i+3] = 255
+                    }
+                }
+                contexto2.putImageData(pixeles2,0,0)
+                // Para cada segmento de la imagen
+                // Recorro la imagen en X
+                var anchura = 16
+                for(var x = 0;x<640;x+=anchura){
+                    // Recorro la imagen en Y
+                    for(var y = 0;y<480;y+=anchura){
+                        // Cojo un cacho de la imagen
+                        datos = contexto2.getImageData(x,y,anchura,anchura)
+                        // inicializo la suma a cero
+                        var suma = 0;
+                        // Voy sumando los colores de las imagenes
+                        for(var i = 0;i<datos.data.length;i+=4){
+                            suma += datos.data[i]
+                        }
+                        // si la suma es mayor que 8000
+                        if(suma > 8000){
+                            // En ese caso pintame un rectangulo
+                            contexto3.fillRect(x,y,anchura,anchura)
+                        }
+                    }
+                }
+                imagenanterior = pixeles
+                contador++;
+                // Borro el temporizador
+                clearTimeout(temporizador)
+                // Relanzo la funcion
+                temporizador = setTimeout("bucle()",33)
+            }
+        </script>
+    </body>
+</html>

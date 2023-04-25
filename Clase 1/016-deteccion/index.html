@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <video playsinline autoplay id="video" width=640 height=480></video>
+        <canvas id="lienzo" width=640 height=480></canvas>
+        <script>
+            // Selecciono el video y lo pongo en una variable
+            const video = document.querySelector('video');
+            // Selecciono el canvas y lo meto en una variable
+            const canvas = window.canvas = document.querySelector('canvas');
+            // Esto es lo que ocurre cuando la captura es exitosa
+            function handleSuccess(stream) {
+                // En el video, pongo lo que viene de la camara
+              window.stream = stream; 
+              video.srcObject = stream;
+            }
+            const constraints = {
+              audio: false,
+              video: true
+            };
+           // Del navegador, cojo la cámara, y entonces (then) ejecuto handleSuccess
+            navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess);
+            // Creo un temporizador para ejecutar un bucle
+            var temporizador = setTimeout("bucle()",33)
+            // Defino la función de bucle
+            function bucle(){
+                // Copio la información desde el video hasta el canvas
+                canvas.getContext('2d').drawImage(video, 0, 0, 640,480);
+                // Borro el temporizador
+                clearTimeout(temporizador)
+                // Relanzo la funcion
+                temporizador = setTimeout("bucle()",33)
+            }
+        </script>
+    </body>
+</html>

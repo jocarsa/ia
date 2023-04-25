@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <canvas id="lienzo" width="400" height="400"></canvas>
+        <script>
+            // Capturo el número de núcleos
+            var nucleos = navigator.hardwareConcurrency;
+            // Capturo el contexto del canvas
+            var contexto = document.getElementById("lienzo").getContext("2d");
+            // Cargo una imagen
+            var imagen = new Image();
+            // Cargo la fuente de la imagen
+            imagen.src = "josevicente.jpg"
+            // Solo cuando la imagen esté cargada:
+            imagen.onload = function(){
+                // Pinto la imagen
+                contexto.drawImage(imagen,0,0)
+                // Creo una lista de trabajadores
+                var trabajadores = [];
+                // Cargo los datos de la imagen
+                var pixeles = contexto.getImageData(0,0,400,400)
+                console.log(pixeles.data)
+                // Longitud = 640000
+                // Núcleo 1 = 0 - 159.999
+                // Creo un nuevo trabajador
+                var trabajador1 = new Worker("trabajador.js");
+                
+                // Se los envío al worker
+                trabajador1.postMessage(pixeles.data.slice(160.000))
+                trabajador1.onmessage = function(datos){
+                    console.log(datos.data)
+                    for(var i = 0;i<159999;i++){
+                        pixeles.data[i] = datos.data[i];
+                    }
+                    contexto.putImageData(pixeles,0,0)
+                }
+                
+                // Ahora lo pinto en pantalla
+                // Nucleo 2 = 160.000 - 319.999
+                // Núcleo 3 = 320.000 - 479.999
+                // Núcleo 4 = 480.000 - 639.999
+                
+                
+            }
+            
+        </script>
+    </body>
+</html>
