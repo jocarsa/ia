@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <script>
+            var tipos = []
+            // Este es el texto original
+            var texto = "José Vicente está impartiendo un curso de inteligencia artificial en Valencia a Jorge"
+            // Parto el texto original en palabras
+            var palabras = texto.split(" ");
+            // Cargo un listado de nombres propios
+            fetch('nombres-propios-es.txt')
+              .then(response => response.text())
+              .then(text => procesa(text))
+            function procesa(text){
+                var nombres = text.split(/\r?\n/);
+                //console.log(nombres)
+                // Comparo para saber si las palabras del texto están contenidas en la lista de nombres
+                // Primero voy una a una sobre las palabras del texto
+                
+                for(var i = 0;i<palabras.length;i++){
+                    // Ahora repaso uno a uno los nombres
+                    for(var j = 0;j<nombres.length;j++){
+                        // Miro si coinciden
+                        if(palabras[i] == nombres[j]){
+                            tipos[i] = "Nombre propio";
+                            
+                        }
+                    }
+                }
+                fetch('entidades-territoriales.txt')
+              .then(response => response.text())
+              .then(text => entidades(text))
+            }
+            
+            function entidades(text){
+                var entidades = text.split(/\r?\n/);
+                //console.log(nombres)
+                // Comparo para saber si las palabras del texto están contenidas en la lista de nombres
+                // Primero voy una a una sobre las palabras del texto
+                
+                for(var i = 0;i<palabras.length;i++){
+                    // Ahora repaso uno a uno los nombres
+                    for(var j = 0;j<entidades.length;j++){
+                        // Miro si coinciden
+                        if(palabras[i] == entidades[j]){
+                            tipos[i] = "Territorio";
+                            
+                        }
+                    }
+                }
+                fetch('verbos-espanol-conjugaciones.txt')
+                  .then(response => response.text())
+                  .then(text => verbos(text))
+            }
+            
+            function verbos(text){
+                var verbos = text.split(/\r?\n/);
+                for(var i = 0;i<palabras.length;i++){
+                    // Ahora repaso uno a uno los nombres
+                    for(var j = 0;j<verbos.length;j++){
+                        // Miro si coinciden
+                        if(palabras[i] == verbos[j]){
+                            tipos[i] = "Verbo";
+                            
+                        }
+                    }
+                }
+                resultado();
+            }
+            
+            function resultado(){
+                console.log(tipos)
+                // Voy a poner la frase en la pantalla
+                var html = "<table border=1>"
+                html +="<tr>"
+                for(var i = 0;i<palabras.length;i++){
+                    html += "<td>"+tipos[i]+"</td>"
+                }
+                 html +="</tr>"
+                html +="<tr>"
+                for(var i = 0;i<palabras.length;i++){
+                    html += "<td>"+palabras[i]+"</td>"
+                }
+                 html +="</tr>"
+                html += "</table>"
+                document.write(html)
+            }
+            
+        </script>
+    </body>
+</html>
