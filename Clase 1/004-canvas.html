@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <canvas id="lienzo" width="400" height="400"></canvas>
+        <script>
+            var contexto = document.getElementById("lienzo").getContext("2d");
+            var imagen = new Image();
+            imagen.src = "josevicente.jpg"
+            imagen.onload = function(){
+                console.log("hola");
+                contexto.drawImage(imagen,0,0);
+                var datos = contexto.getImageData(0,0,400,400);
+                for(var i = 0;i<datos.data.length;i+=4){
+                    datos.data[i] = 255 - datos.data[i];
+                    datos.data[i+1] = 255 - datos.data[i+1];
+                    datos.data[i+2] = 255 - datos.data[i+2];
+                }
+                contexto.putImageData(datos,0,0)
+            }
+        </script>
+    </body>
+</html>

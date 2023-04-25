@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <canvas id="lienzo" width="400" height="400"></canvas>
+        <script>
+            var contexto = document.getElementById("lienzo").getContext("2d");
+            var imagen = new Image();
+            imagen.src = "josevicente.jpg"
+            imagen.onload = function(){
+                console.log("hola");
+                contexto.drawImage(imagen,0,0);
+                var datos = contexto.getImageData(0,0,1,1);
+                console.table(datos.data)
+            }
+        </script>
+    </body>
+</html>

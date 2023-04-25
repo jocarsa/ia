@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <canvas id="lienzo" width="400" height="400"></canvas>
+        <script>
+            var contexto = document.getElementById("lienzo").getContext("2d");
+            var imagen = new Image();
+            imagen.src = "josevicente.jpg"
+            imagen.onload = function(){
+                console.log("hola");
+                // Dibujo la imagen en el canvas
+                contexto.drawImage(imagen,0,0);
+                // Cargo los pixeles en una variable
+                var datos = contexto.getImageData(0,0,400,400);
+                // Recorro la imagen pixel a pixel
+                for(var i = 0;i<datos.data.length;i+=4){
+                    // Invierto el color rojo
+                    datos.data[i] = 255 - datos.data[i];
+                    // Invierto el color verde
+                    datos.data[i+1] = 255 - datos.data[i+1];
+                    // Invierto el color azul
+                    datos.data[i+2] = 255 - datos.data[i+2];
+                }
+                // Vuelco la imagen de vuelta al canvas
+                contexto.putImageData(datos,0,0)
+            }
+        </script>
+    </body>
+</html>
