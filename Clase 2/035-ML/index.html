@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-3.6.4.js" integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+        <style>
+            canvas{
+                border:1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="lienzooriginal" width=2048 height=2048></canvas>
+        <canvas id="lienzogrande" width=256 height=256></canvas>
+        <canvas id="lienzopequeno" width=64 height=64></canvas>
+        <div id="resultados"></div>
+        
+        <script>
+            // Creo una imagen en memoria
+            var foto = new Image();
+            // Como fuente de esa foto cargo el jpg
+            foto.src = "foto.jpg";
+            // Creo el contexto en el canvas para pintar
+            var contexto = document.getElementById("lienzooriginal").getContext("2d")
+            // Creo el contexto grande
+            var contextogrande = document.getElementById("lienzogrande").getContext("2d")
+            // Creo el contexto pequeño
+            var contextopequeno = document.getElementById("lienzopequeno").getContext("2d")
+            // Solo cuando la foto haya cargado
+            foto.onload = function(){
+                cuadradito(512,512)
+                
+                 
+            }
+            function cuadradito(x,y){
+                // Solo en ese caso, la pinto en el canvas
+                contexto.drawImage(foto,0,0,2048,2048)
+                // Selecciono un trozo de imagen del canvas original
+                var trozo = contexto.getImageData(x,y,256,256)
+                // Lo pego en el contexto grande
+                contextogrande.putImageData(trozo,0,0)
+                // Ahora tomo ese mismo trozo, y lo pego en pequeño
+                // Voy uno de cada cuatro en X
+                for(var x = 0;x<256;x+=4){
+                    // Tomo uno de cada 4 en y
+                    for(var y = 0;y<256;y+=4){
+                        // Saco el color del pixel
+                        var pixel = contextogrande.getImageData(x,y,1,1)
+                        // Tomo el componente rojo
+                        colorr = pixel.data[0];
+                        // Tomo el componente verde
+                        colorg = pixel.data[1];
+                        // Tomo el componente azul
+                        colorb = pixel.data[2];
+                        // Formulo el color
+                        color = "rgb("+colorr+","+colorg+","+colorb+")"
+                        // Pongo el color del contexto
+                        contextopequeno.fillStyle = color
+                        // Pinto un pixel de ese color en el contexto pequeño
+                        contextopequeno.fillRect(x/4,y/4,1,1)
+                    }
+                }
+                var epoch =  Math.round(Date.now() / 1000)
+                // Ahora me guardo el resultado
+                datospequeno = contextopequeno.getImageData(0,0,64,64)
+                fetch('guardadatos.php', {
+                    method: 'POST',
+                    body: 'epoch='+epoch+'&datos='+datospequeno.data, 
+                    headers: {
+                        'Content-type': 'application/x-www-form-urlencoded' 
+                    }
+                });
+             
+                datosgrande = contextogrande.getImageData(0,0,256,256)
+                fetch('guardadatosgrande.php', {
+                    method: 'POST',
+                    body: 'epoch='+epoch+'&datos='+datosgrande.data, 
+                    headers: {
+                        'Content-type': 'application/x-www-form-urlencoded' 
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>

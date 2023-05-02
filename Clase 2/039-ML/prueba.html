@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-3.6.4.js" integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+        <style>
+            canvas{
+                border:1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="lienzooriginal" width=512 height=512></canvas>
+        <canvas id="lienzopequeno" width=64 height=64></canvas>
+        <div id="resultados"></div>
+        
+        <script>
+            // Creo una imagen en memoria
+            var foto = new Image();
+            // Como fuente de esa foto cargo el jpg
+            foto.src = "fotoprueba.jpg";
+            // Creo el contexto en el canvas para pintar
+            var contexto = document.getElementById("lienzooriginal").getContext("2d")
+            // Creo el contexto pequeño
+            var contextopequeno = document.getElementById("lienzopequeno").getContext("2d")
+            // Solo cuando la foto haya cargado
+            foto.onload = function(){
+                contexto.drawImage(foto,0,0)
+                var pixeles = contexto.getImageData(256,256,64,64)
+                contextopequeno.putImageData(pixeles,0,0)
+                 fetch("datos.txt").then(function(e){
+                        return e.text();
+                    }).then(function(data){
+                       console.log(data)
+                     let arr = data.split("\n");
+                        console.log(arr)
+                     // Tomo los datos del cuadradito 
+                     datoscuadradito = contextopequeno.getImageData(0,0,64,64).data
+                     console.log(datoscuadradito)
+                     // Itero en el array
+                     var mejorcandidato = 100000000000000
+                     var mejorepoch = 0;
+                     for(var i = 0;i<arr.length-1;i++){
+                         var epoch = arr[i].split(";")[0]
+                         var datos = arr[i].split(";")[1]
+                         //console.log("voy a comparar: "+datos)
+                         //console.log("contra: "+datoscuadradito)
+                         var datospartidos = datos.split(",")
+                         
+                         var suma = 0;
+                         for(var j = 0;j<datospartidos.length;j++){
+                             //console.log("datospartidos:"+datospartidos[j])
+                             //console.log("datoscuadradito:"+datoscuadradito[j])
+                             suma += Math.abs(datospartidos[j]-datoscuadradito[j])
+                         }
+                         if(suma < mejorcandidato){
+                             mejorcandidato = suma
+                             mejorepoch = epoch
+                         }
+                         //console.log("longitud de los datos: "+datospartidos.length)
+                         //console.log("longitud del cuadradito: "+datoscuadradito.length)
+                         console.log("para el indice "+i+" la suma ha sido de "+suma)
+                     }
+                     console.log("el mejor candidato es aquel en que la suma es: "+mejorcandidato+" y el identificador (epoch) es: "+mejorepoch)
+                    })
+            }
+           
+        </script>
+    </body>
+</html>

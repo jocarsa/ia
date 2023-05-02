@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <canvas id="lienzooriginal" width=2048 height=2048></canvas>
+        <script>
+            // Creo una imagen en memoria
+            var foto = new Image();
+            // Como fuente de esa foto cargo el jpg
+            foto.src = "foto.jpg";
+            // Creo el contexto en el canvas para pintar
+            var contexto = document.getElementById("lienzooriginal").getContext("2d")
+            // Solo cuando la foto haya cargado
+            foto.onload = function(){
+                // Solo en ese caso, la pinto en el canvas
+                contexto.drawImage(foto,0,0,2048,2048)
+            }
+            
+        </script>
+    </body>
+</html>
