@@ -20,7 +20,7 @@
             function calcula(nombreimagen){
                 
                 var imagen = new Image();
-                imagen.src = "../fotos/caras/"+nombreimagen+".jpg"
+                imagen.src = nombreimagen+".jpg"
                 imagen.onload = function(){
                     coriginal.drawImage(imagen,0,0,512,512)
                     // Buscar bordes ////////////////////////////////////////////////////////////
@@ -101,31 +101,42 @@
 
                        }
                     }
-                    clineas.clearRect(0,0,512,512)
+                    
                     console.log("ya")
                     console.log("verticales: "+verticales+" - horizontales: "+horizontales)
                     var total = verticales+horizontales
                     var ph = horizontales/total
                     var pv = verticales/total
                     console.log("verticales: "+ph+"% - horizontales: "+pv+"%")
-                    fetch('guarda.php', {
-                        method: 'POST',
-                        body: 'tipo=cara&h='+ph+'&v='+pv, 
-                        headers: {
-                            'Content-type': 'application/x-www-form-urlencoded' 
-                        }
-                    });
-                    contador++;
-                    clearTimeout(temporizador )
-                    temporizador = setTimeout(function(){
-
-                        calcula(archivos[contador]);
-                    },100)
+                     fetch("datos.txt").then(function(e){
+                            return e.text();
+                        }).then(function(data){
+                           //console.log(data)
+                         arr = data.split("\n");
+                         console.log(arr)
+                         // Ahora miro elemento a elemento
+                         mejorcandidato = 1000000
+                         objetomejorcandidato = ""
+                         for(var i = 0;i<arr.length;i++){
+                             partido = arr[i].split(",")
+                             objeto = partido[0]
+                             horizontal = partido[1]
+                             vertical = partido[2]
+                             resta = Math.abs(horizontal - ph) + Math.abs(vertical - pv)
+                             console.log(objeto+": "+resta)
+                             if(resta < mejorcandidato){
+                                 mejorcandidato = resta;
+                                 objetomejorcandidato = objeto
+                             }
+                         }
+                         console.log("Parece que el objeto en pantalla es: "+objetomejorcandidato)
+                       })
+                    
                 }
                 
             }
             temporizador = setTimeout(function(){
-                calcula(archivos[contador]);
+                calcula("prueba5");
             },1000)
         </script>
     </body>

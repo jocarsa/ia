@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <canvas id="lienzo" width=512 height=512></canvas>
+        <input type="file" id="fileinput">
+        <script>
+            var contexto = document.getElementById("lienzo").getContext("2d")
+            var openFile = function(event) {
+            var input = event.target;
+            var audioContext = new AudioContext();
+
+            var reader = new FileReader();
+            reader.onload = function(){
+            var arrayBuffer = reader.result;
+              console.log("arrayBuffer:");
+              console.log(arrayBuffer);
+              audioContext.decodeAudioData(arrayBuffer, decodedDone);
+
+            };
+            reader.readAsArrayBuffer(input.files[0]);
+            };
+            function decodedDone(decoded) {
+
+             var typedArray = new Float32Array(decoded.length);
+
+            typedArray=decoded.getChannelData(0);
+            console.log("typedArray:");
+            console.log(typedArray);
+                var longitud = typedArray.length;
+                for(var i  =0 ;i<longitud;i++){
+                    contexto.fillRect(i/10,256-typedArray[i]*100,1,1)
+                }
+                var estado = "positivo"
+                var contador = 0;
+                for(var i  =0 ;i<longitud;i++){
+                    contador++;
+                    if(typedArray[i-1] < 0 && typedArray[i] > 0){
+                        //console.log("cambio")
+                        console.log(contador)
+                        contador = 0;
+                    }
+                }
+                // Frecuencia del audio = 44100 Hz
+                // Frecuencia del LA = 440 Hz
+                // 44100/440 = 
+            }
+            document.getElementById('fileinput').addEventListener('change', openFile, false);
+        </script>
+    </body>
+</html>

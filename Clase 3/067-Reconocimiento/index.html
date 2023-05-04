@@ -20,7 +20,7 @@
             function calcula(nombreimagen){
                 
                 var imagen = new Image();
-                imagen.src = "../fotos/caras/"+nombreimagen+".jpg"
+                imagen.src = "../fotos/ventanas/"+nombreimagen+".jpg"
                 imagen.onload = function(){
                     coriginal.drawImage(imagen,0,0,512,512)
                     // Buscar bordes ////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@
                     console.log("verticales: "+ph+"% - horizontales: "+pv+"%")
                     fetch('guarda.php', {
                         method: 'POST',
-                        body: 'tipo=cara&h='+ph+'&v='+pv, 
+                        body: 'tipo=ventanas&h='+ph+'&v='+pv, 
                         headers: {
                             'Content-type': 'application/x-www-form-urlencoded' 
                         }
