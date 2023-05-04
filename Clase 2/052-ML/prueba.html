@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-3.6.4.js" integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+        <style>
+            body{
+                background:black;
+            }
+            #contenedor{
+                position:relative;
+                margin:auto;
+                width:2048px;
+                height:2048px;
+            }
+            canvas{
+                border:1px solid black;
+                width:100%;
+                height:100%;
+                position:absolute;
+                top:0px;
+                left:0px;
+                image-rendering: pixelated;
+            }
+            #escondido{
+                display:none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="contenedor">
+            <canvas id="lienzooriginal" width=512 height=512></canvas>
+            <canvas id="lienzofinal" width=2048 height=2048></canvas>
+            <canvas id="dibujos"  width=2048 height=2048></canvas>
+        </div>
+        <div id="escondido">
+            <canvas id="lienzopequeno" width=16 height=16></canvas>
+            <canvas id="lienzocomprobacion" width=16 height=16></canvas>
+            <canvas id="lienzocomprobaciongrande" width=64 height=64></canvas>
+        </div>
+        
+        
+        <div id="resultados"></div>
+        
+        <script>
+            var arr = []
+            var datosgrandes = []
+            
+             fetch("datos.txt").then(function(e){
+                    return e.text();
+                }).then(function(data){
+                   console.log(data)
+                 arr = data.split("\n");
+               })
+            
+            
+            
+            var temporizador = ""
+            var cx = 0;
+            var cy = 0;
+            // Creo una imagen en memoria
+            var foto = new Image();
+            // Como fuente de esa foto cargo el jpg
+            foto.src = "fotocomprobacion.jpg";
+            // Creo el contexto en el canvas para pintar
+            var contexto = document.getElementById("lienzooriginal").getContext("2d")
+            // Creo el contexto pequeño
+            var contextopequeno = document.getElementById("lienzopequeno").getContext("2d")
+            // Creo el contexto pequeño
+            var contextocomprobacion = document.getElementById("lienzocomprobacion").getContext("2d")
+            var contextocomprobaciongrande = document.getElementById("lienzocomprobaciongrande").getContext("2d")
+            var contextofinal = document.getElementById("lienzofinal").getContext("2d")
+            var contextodibujos = document.getElementById("dibujos").getContext("2d")
+            // Solo cuando la foto haya cargado
+            foto.onload = function(){
+                temporizador = setTimeout("bucle()",5000)
+                
+            }
+            function bucle(){
+                buscacuadradito(cx,cy)
+                cx+=16;
+                if(cx > 512){
+                    cx = 0;
+                    cy += 16
+                }
+                
+                clearTimeout(temporizador)
+                if(cy < 512){
+                    temporizador = setTimeout("bucle()",0)
+                    }else{
+                        //console.log("procesamiento finalizado")
+                    }
+            }
+            function buscacuadradito(x,y){
+                contextodibujos.clearRect(0,0,2048,2048)
+                contextodibujos.fillStyle  ="white"
+                contextodibujos.lineWidth = 5
+                contextodibujos.strokeStyle = "white"
+                contextodibujos.beginPath()
+                contextodibujos.strokeRect(x*4,y*4,64,64)
+                contextodibujos.stroke()
+                contexto.drawImage(foto,0,0,512,512)
+                var pixeles = contexto.getImageData(cx,cy,16,16)
+                contextopequeno.putImageData(pixeles,0,0)
+                
+                       // console.log(arr)
+                     // Tomo los datos del cuadradito 
+                     datoscuadradito = contextopequeno.getImageData(0,0,16,16).data
+                     //console.log(datoscuadradito)
+                     // Itero en el array
+                     var mejorcandidato = 100000000000000
+                     var mejorepoch = 0;
+                     var mejorindice = 0;
+                     for(var i = 0;i<arr.length-20;i++){
+                         var epoch = arr[i].split(";")[0]
+                         var datos = arr[i].split(";")[1]
+                         //console.log("voy a comparar: "+datos)
+                         //console.log("contra: "+datoscuadradito)
+                         //console.log(datos)
+                         //console.log("ok")
+                         var datospartidos = datos.split(",")
+                         
+                         var suma = 0;
+                         for(var j = 0;j<datospartidos.length;j++){
+                             //console.log("datospartidos:"+datospartidos[j])
+                             //console.log("datoscuadradito:"+datoscuadradito[j])
+                             suma += Math.abs(datospartidos[j]-datoscuadradito[j])
+                         }
+                         if(suma < mejorcandidato){
+                             mejorcandidato = suma
+                             mejorepoch = epoch
+                             mejorindice = i
+                         }
+                         //console.log("longitud de los datos: "+datospartidos.length)
+                         //console.log("longitud del cuadradito: "+datoscuadradito.length)
+                         //console.log("para el indice "+i+" la suma ha sido de "+suma)
+                     }
+                     console.log("el mejor candidato es aquel en que la suma es: "+mejorcandidato+" y el identificador (epoch) es: "+mejorepoch+" y el mejor indice es "+mejorindice)
+                     // Que es lo que tiene el indice 36?
+                     datosindicecorrecto = arr[mejorindice].split(";")[1]
+                     //console.log(datosindicecorrecto)
+                     datosindicecorrectopartido = datosindicecorrecto.split(",")
+                     var datoscomprobacion = contextocomprobacion.getImageData(0,0,16,16)
+                     for(var i = 0;i<datoscomprobacion.data.length;i++){
+                         datoscomprobacion.data[i] = datosindicecorrectopartido[i]
+                     }
+                     contextocomprobacion.putImageData(datoscomprobacion,0,0)
+                     // Ahora voy a por la imagen grande
+                     
+                          //console.log(datosgrandes)
+                         var datosgrandesseleccionados = ""
+                         fetch("datosgrandes/"+mejorepoch+".txt").then(function(e){
+                            return e.text();
+                            }).then(function(data){
+                            console.log(data)
+
+                              datosgrandes = data.split("\n");
+                            console.log(datosgrandes)
+                             
+                             // Busco dentro de los datos grandes
+                            
+                                    datosgrandesseleccionados = datosgrandes[0].split(";")[1]
+                               
+                            datosgrandesseleccionadospartidos = datosgrandesseleccionados.split(",")
+                            console.log(datosgrandesseleccionadospartidos)
+                            var datoscomprobaciongrande = contextocomprobaciongrande.getImageData(0,0,64,64)
+                            for(var j = 0;j<datoscomprobaciongrande.data.length;j++){
+                                datoscomprobaciongrande.data[j] = datosgrandesseleccionadospartidos[j] 
+                                /*if((j+1)%4 == 0){
+                                    datoscomprobaciongrande.data[j] = 50
+                                }*/
+                            }
+                            contextocomprobaciongrande.putImageData(datoscomprobaciongrande,0,0)
+                            // Ahora tomo los datos del resultado de la busqueda y los pego en el canvas grande
+                            var datosfinales = contextocomprobaciongrande.getImageData(0,0,64,64)
+                            contextofinal.putImageData(datosfinales,cx*4,cy*4)
+                             
+                             
+                            })
+                            
+                        
+                     
+                  
+            }
+            
+           
+        </script>
+    </body>
+</html>
