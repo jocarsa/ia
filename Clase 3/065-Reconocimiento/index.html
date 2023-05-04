@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            canvas{border:1px solid black;}
+        </style>
+    </head>
+    <body>
+        <canvas id="original" width=512 height=512></canvas>
+        <canvas id="bordes" width=512 height=512></canvas>
+        <canvas id="lineas" width=512 height=512></canvas>
+        <script src="dir.php"></script>
+        <script>
+            var contador = 0;
+            console.log(archivos)
+            var coriginal = document.getElementById("original").getContext("2d")
+            var cbordes = document.getElementById("bordes").getContext("2d")
+            var clineas = document.getElementById("lineas").getContext("2d")
+            var temporizador = ""
+            function calcula(nombreimagen){
+                clineas.clearRect(0,0,512,512)
+                var imagen = new Image();
+                imagen.src = "../fotos/caras/"+nombreimagen+".jpg"
+                imagen.onload = function(){
+                    coriginal.drawImage(imagen,0,0,512,512)
+                    // Buscar bordes ////////////////////////////////////////////////////////////
+                    // Barro la imagen en X, para cada uno de los pixeles en X
+                    for(var x=0;x<512;x++){
+                        // Barro la imagen en Y, para cada uno de los pixeles en Y
+                       for(var y=0;y<512;y++){
+                           // tomo el pixel del medio
+                           var pixel = coriginal.getImageData(x,y,1,1)
+                           // Ahora tomo los pixeles de alrededor
+                            var alrededor = coriginal.getImageData(x-1,y-1,3,3)
+                            // Inicio una suma
+                            var suma = 0;
+                           // Comparo los pixeles de alrededor con el del medio
+                            for(var i = 0;i<alrededor.data.length;i+=4){
+                                // Componente rojo
+                                suma += Math.abs(alrededor.data[i] - pixel.data[0]);
+                                // Componente verde
+                                suma += Math.abs(alrededor.data[i+1] - pixel.data[1]);
+                                // Componente azul
+                                suma += Math.abs(alrededor.data[i+2] - pixel.data[2]);
+                            }
+                           // Saco la suma
+                            //console.log(suma)
+                           if(suma < 500){
+                               cbordes.fillStyle = "black"
+                               cbordes.fillRect(x,y,1,1)
+                           }else{
+                               cbordes.fillStyle = "white"
+                               cbordes.fillRect(x,y,1,1)
+                           }
+                        } 
+                    }
+                    // Buscar verticales ////////////////////////////////////////////////////////////
+                    var tolerancia = 15
+                    var horizontales = 0;
+                    var verticales = 0;
+                    // Barro la imagen en X, para cada uno de los pixeles en X
+                    for(var x=0;x<512;x++){
+                        // Barro la imagen en Y, para cada uno de los pixeles en Y
+                       for(var y=0;y<512;y++){
+                           // Para cada punto, miro una barra vertical
+                           var pixeles = cbordes.getImageData(x-1,y-4,3,9)
+                           var suma = 0;
+                           for(var i = 0;i<pixeles.data.length;i+=4){
+                               if(pixeles.data[i] == 255){
+                                   suma++;
+                               }
+                           }
+                           //console.log(suma)
+                           if(suma > tolerancia){
+                               clineas.fillStyle = "red"
+                               clineas.fillRect(x-1,y-4,3,9)
+                               verticales++;
+                           }
+
+                       }
+                    }
+                    // Buscar horizontales ////////////////////////////////////////////////////////////
+                    // Barro la imagen en X, para cada uno de los pixeles en X
+                    for(var x=0;x<512;x++){
+                        // Barro la imagen en Y, para cada uno de los pixeles en Y
+                       for(var y=0;y<512;y++){
+                           // Para cada punto, miro una barra vertical
+                           var pixeles = cbordes.getImageData(x-4,y-1,9,3)
+                           var suma = 0;
+                           for(var i = 0;i<pixeles.data.length;i+=4){
+                               if(pixeles.data[i] == 255){
+                                   suma++;
+                               }
+                           }
+                           //console.log(suma)
+                           if(suma > tolerancia){
+                               clineas.fillStyle = "green"
+                               clineas.fillRect(x-4,y-1,9,3)
+                               horizontales++;
+                           }
+
+                       }
+                    }
+                    console.log("ya")
+                    console.log("verticales: "+verticales+" - horizontales: "+horizontales)
+                    var total = verticales+horizontales
+                    var ph = horizontales/total
+                    var pv = verticales/total
+                    console.log("verticales: "+ph+"% - horizontales: "+pv+"%")
+                }
+                contador++;
+                clearTimeout(temporizador )
+                temporizador = setTimeout(function(){
+                    
+                    calcula(archivos[contador]);
+                },5000)
+            }
+            temporizador = setTimeout(function(){
+                calcula(archivos[contador]);
+            },1000)
+        </script>
+    </body>
+</html>
