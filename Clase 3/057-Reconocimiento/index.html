@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            canvas{border:1px solid black;}
+        </style>
+    </head>
+    <body>
+        <canvas id="original" width=512 height=512></canvas>
+        <canvas id="bordes" width=512 height=512></canvas>
+        <script>
+            var coriginal = document.getElementById("original").getContext("2d")
+            var cbordes = document.getElementById("bordes").getContext("2d")
+            var imagen = new Image();
+            imagen.src = "fotos/caras/1.jpg"
+            imagen.onload = function(){
+                coriginal.drawImage(imagen,0,0,512,512)
+                // Barro la imagen en X, para cada uno de los pixeles en X
+                for(var x=0;x<512;x++){
+                    // Barro la imagen en Y, para cada uno de los pixeles en Y
+                   for(var y=0;y<512;y++){
+                       // tomo el pixel del medio
+                       var pixel = coriginal.getImageData(x,y,1,1)
+                       // Ahora tomo los pixeles de alrededor
+                        var alrededor = coriginal.getImageData(x-1,y-1,3,3)
+                        // Inicio una suma
+                        var suma = 0;
+                       // Comparo los pixeles de alrededor con el del medio
+                        for(var i = 0;i<alrededor.data.length;i+=4){
+                            // Componente rojo
+                            suma += Math.abs(alrededor.data[i] - pixel.data[0]);
+                            // Componente verde
+                            suma += Math.abs(alrededor.data[i+1] - pixel.data[1]);
+                            // Componente azul
+                            suma += Math.abs(alrededor.data[i+2] - pixel.data[2]);
+                        }
+                       // Saco la suma
+                        //console.log(suma)
+                       if(suma < 500){
+                           cbordes.fillStyle = "black"
+                           cbordes.fillRect(x,y,1,1)
+                       }else{
+                           cbordes.fillStyle = "white"
+                           cbordes.fillRect(x,y,1,1)
+                       }
+                    } 
+                }
+                
+            }
+            
+        </script>
+    </body>
+</html>
