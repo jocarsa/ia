@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <title>IA</title>
+        <meta charset="utf-8">
+        <style>
+            textarea{
+                width:400px;
+                height:400px;
+            }
+        </style>
+    </head>
+    <body>
+        <textarea id="texto"></textarea>
+        <p>Propuesta:</p>
+        <p id="resultado"></p>
+        <script>
+            document.getElementById("texto").onkeyup = function(){
+                console.log("has pulsado una tecla")
+                var texto = this.value
+                console.log(texto)
+                var partido = texto.split(" ")
+                console.log(partido)
+            }
+        </script>
+    </body>
+</html>

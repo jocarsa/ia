@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <title>IA</title>
+        <meta charset="utf-8">
+        <style>
+            textarea{
+                width:400px;
+                height:400px;
+            }
+        </style>
+    </head>
+    <body>
+        <textarea id="texto"></textarea>
+        <p>Propuesta:</p>
+        <p id="resultado"></p>
+        <script>
+            document.getElementById("texto").onkeyup = function(){
+                //console.log("has pulsado una tecla")
+                var texto = this.value
+                //console.log(texto)
+                var partido = texto.split(" ")
+                //console.log(partido)
+                var actual = partido[partido.length-1]
+                var ultima = partido[partido.length-2]
+                var penultima = partido[partido.length-3]
+                var antepenultima = partido[partido.length-4]
+                //console.log("La ultima palabra es "+ultima)
+                // Una vez que he cogido la ultima palabra, la envío al servidor
+                fetch('comprueba.php', {
+                    method: 'POST',
+                    body: 'actual='+actual+'&ultima='+ultima+'&penultima='+penultima+'&antepenultima='+antepenultima, 
+                    headers: {
+                        'Content-type': 'application/x-www-form-urlencoded' 
+                    }
+                })
+                .then(res => res.text())
+                .then(res => dime(res))
+                
+            }
+            function dime(texto){
+                console.log(texto)
+                document.getElementById("resultado").innerHTML = texto
+            }
+        </script>
+    </body>
+</html>
