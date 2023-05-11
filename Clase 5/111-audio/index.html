@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        <canvas id="lienzo" width=512 height=512></canvas>
+        <input type="file" id="abrirArchivoHTML">
+        <script>
+            // Creo un contexto para pintar visualmente la onda
+            var contexto = document.getElementById("lienzo").getContext("2d")
+            // Defino la función de apertura del archivo
+            var abrirArchivo = function(event) {
+                // Defino los datos de la entrada
+                var entrada = event.target;
+                // Voy a trabajar con audio, así que creo un contexto de audio
+                var contextoAudio = new AudioContext();
+                // Creo un lector de archivo
+                var lectorArchivos = new FileReader();
+                lectorArchivos.onload = function(){
+                    // Estos son los datos de entrada
+                    var coleccionEntrada = lectorArchivos.result;
+                    console.log("arrayBuffer:");
+                    // Quiero saber cuales son los datos de entrada
+                    console.log(coleccionEntrada);
+                    // Quiero volcar los datos de entrada a un audio
+                    // Cuando haya finalizado, ejecuta una función
+                    contextoAudio.decodeAudioData(coleccionEntrada, decodificadoFinalizado);
+                };
+                // Quiero leer la entrada como una colección de datos
+                lectorArchivos.readAsArrayBuffer(entrada.files[0]);
+            };
+            function decodificadoFinalizado(decoded) {
+                // Toma la colección de datos, y la convierte en un array de 32 bits
+                var coleccionConTipo = new Float32Array(decoded.length);
+                // Toma los datos del canal 0, y pasalos al array
+                coleccionConTipo=decoded.getChannelData(0);
+                console.log("Contenido de la colección:");
+                // Saco la colección por consola para ver su forma
+                console.log(coleccionConTipo);
+                // Averiguo la longitud de los datos
+                var longitud = coleccionConTipo.length;
+                // Para cada una de las muestras
+                for(var i  =0 ;i<longitud;i++){
+                    // Pinto la muestra en el contexto
+                    contexto.fillRect(i/10,256-coleccionConTipo[i]*100,1,1)
+                } 
+                // Quiero tomar el audio cacho a cacho
+                for(var i = 0;i<longitud;i+=1){
+                    // Tomo una parte de la colección
+                    partido = coleccionConTipo.slice(i,i+150)
+                    // Demuestro que la puedo sacar por consola
+                    console.log(partido)
+                    // Voy a guardar esos datos en el servidor
+                    fetch('guarda.php', {
+                        method: 'POST',
+                        body: 'vocal=u&datos='+partido, 
+                        headers: {
+                            'Content-type': 'application/x-www-form-urlencoded' 
+                        }
+                    })
+                    
+                }
+                
+            }
+           
+            // 
+            document.getElementById('abrirArchivoHTML').addEventListener('change', abrirArchivo, false);
+        </script>
+    </body>
+</html>
